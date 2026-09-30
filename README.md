@@ -101,7 +101,7 @@ facego/
 
 | 依赖 | 版本 | 说明 |
 | --- | --- | --- |
-| Qt | 6.5+（开发于 6.8） | 需包含 Widgets、Network、Sql 模块 |
+| Qt | 6.2+（开发于 6.8） | 需包含 Widgets、Network、Sql 模块 |
 | OpenCV | 4.5.x | 需提供 CMake 配置（`OpenCVConfig.cmake`） |
 | SeetaFace6 | 6.x | 需提供 CMake 配置与模型文件（仅服务端；官方通过网盘分发） |
 | CMake | 3.16+ | 构建系统 |

@@ -35,7 +35,7 @@ option(FACEGO_BUILD_CLIENT "构建考勤客户端 AttendenceClient" ON)
 option(FACEGO_BUILD_SERVER "构建考勤服务端 AttendenceServer（需要 SeetaFace6）" ON)
 
 # ---- 依赖：Qt6 公共组件（两个目标都用 Widgets/Network；Sql 仅 Server，在其子工程内查找）----
-find_package(Qt6 6.5 REQUIRED COMPONENTS Widgets Network)
+find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets Network)
 
 # ---- 依赖：OpenCV（两个目标都用）----
 # 若 CMake 找不到，配置时追加：-DOpenCV_DIR=<OpenCVConfig.cmake 所在目录>
