@@ -7,11 +7,17 @@ on:
 
 jobs:
   # ------------------------------------------------------------
-  # Linux 完整构建：apt 安装 Qt6 / OpenCV，源码构建 SeetaFace2
-  # 用于持续验证两个目标（Client + Server）在 Linux 下可编译
+  # Linux 构建 Client：apt 安装 Qt6 / OpenCV
+  #
+  # Server 依赖第三方 SeetaFace6（中科视拓官方仅通过网盘分发预编译二进制，
+  # 无公开源码仓库 / 包管理器源），CI 无法自动、可靠地获取，因此 CI 覆盖
+  # Client；Server 已在本地（Windows + MinGW / 本地 Linux）实际构建验证。
+  #
+  # 如需在 CI 中同时构建 Server：请自行准备 SeetaFace6 SDK，在下方 Configure
+  # 步骤去掉 -DFACEGO_BUILD_SERVER=OFF，并通过 CMAKE_PREFIX_PATH 指向 SDK。
   # ------------------------------------------------------------
-  linux-build:
-    name: Build on Ubuntu
+  linux-build-client:
+    name: Build Client on Ubuntu
     runs-on: ubuntu-latest
 
     steps:
@@ -24,44 +30,17 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             build-essential cmake ninja-build git \
             qt6-base-dev qt6-base-dev-tools qt6-tools-dev \
-            libgl1-mesa-dev libopencv-dev libopenblas-dev
+            libgl1-mesa-dev libopencv-dev
 
-      - name: Build and install SeetaFace2
-        run: |
-          git clone --depth 1 https://github.com/seetafaceengine/SeetaFace2.git
-          cmake -S SeetaFace2 -B SeetaFace2/build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/seetaface-install"
-          cmake --build SeetaFace2/build --target install
-
-      - name: Configure FaceGo
+      - name: Configure (Client only)
         run: |
           cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/seetaface-install"
+            -DFACEGO_BUILD_SERVER=OFF \
+            -DFACEGO_BUILD_CLIENT=ON
 
-      - name: Build FaceGo (Client + Server)
+      - name: Build Client
         run: cmake --build build
 
       - name: Show build artifacts
         run: ls -R build/bin || true
-
-  # ------------------------------------------------------------
-  # Windows 构建说明（默认注释，避免在缺少第三方库时产生红叉）
-  # 如需启用：用 jurplel/install-qt-action 安装 Qt，并用 vcpkg
-  # 安装 / 源码构建 OpenCV 与 SeetaFace2 后，再执行 CMake 构建。
-  # ------------------------------------------------------------
-  # windows-build:
-  #   name: Build on Windows
-  #   runs-on: windows-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Install Qt
-  #       uses: jurplel/install-qt-action@v4
-  #       with:
-  #         version: '6.8.*'
-  #         arch: win64_mingw
-  #     - name: Configure
-  #       run: cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release
-  #     - name: Build
-  #       run: cmake --build build

@@ -4,7 +4,7 @@
 
 - 语言 / 标准：C++17
 - GUI / 网络 / 数据库：Qt 6（Widgets、Network、Sql）
-- 视觉 / 识别：OpenCV 4.5、SeetaFace2
+- 视觉 / 识别：OpenCV 4.5、SeetaFace6
 - 形态：客户端-服务器（C/S），TCP 通信
 
 ## 1. 总体架构
@@ -15,7 +15,7 @@
  AttendenceClient C ┘
        │                                        │
        │ 摄像头采集 / 级联框选 / JPEG 编码        ├─ 网络模块：QTcpServer，多连接管理 + 帧解析
-       │                                        ├─ 人脸模块：FaceObject（SeetaFace2 + OpenCV）
+       │                                        ├─ 人脸模块：FaceObject（SeetaFace6 + OpenCV）
        │                                        └─ 数据模块：DataBase（SQLite，单例）
 ```
 
@@ -46,7 +46,7 @@
 | --- | --- |
 | `LoginDialog` | 管理员登录、账号注册、密码找回、记住密码 / 自动登录 |
 | `ServerWindow` | 服务端主窗口：监听端口、管理客户端连接、模式切换、员工 / 部门 / 岗位 / 考勤界面 |
-| `FaceObject` | 封装 SeetaFace2：人脸检测、特征注册、1:N 比对、特征库读写 |
+| `FaceObject` | 封装 SeetaFace6：人脸检测、特征注册、1:N 比对、特征库读写 |
 | `DataBase` | SQLite 单例封装：建表与各业务表的增删改查 |
 | `main.cpp` | 服务端程序入口 |
 
@@ -95,7 +95,7 @@
 
 ## 4. 人脸处理流程
 
-### 4.1 SeetaFace2 组件
+### 4.1 SeetaFace6 组件
 
 `FaceObject` 组合使用：
 
@@ -223,11 +223,22 @@ t_employees (N) ──< t_attendance(N)
 见根目录 [README.md](../README.md) 的“快速开始”。简述：
 
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release   # 配置
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release   # 配置（默认同时构建 Client 与 Server）
 cmake --build build -j                            # 编译，产物在 build/bin
 ```
 
+没有 SeetaFace6 SDK 时只构建 Client：
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFACEGO_BUILD_SERVER=OFF
+```
+
 部署时需保证 Qt / OpenCV / SeetaFace 的运行时 DLL（或 `.so`）与模型文件可被找到。
+
+### 8.1 持续集成覆盖范围
+
+- GitHub Actions（Ubuntu）通过 apt 安装 Qt6 / OpenCV，自动构建 **Client**；
+- **Server 不在 CI 覆盖范围**：SeetaFace6 官方开放版仅通过网盘分发预编译二进制（无公开统一源码仓库 / 包管理器源；社区 SeetaFace6Open 为另一套命名且不含 FaceEngine），CI 无法自动、可靠获取。Server 已在本地（Windows + MinGW）实际构建并链接通过。
 
 ## 9. 已知局限汇总
 

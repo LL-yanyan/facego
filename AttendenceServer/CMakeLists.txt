@@ -3,6 +3,9 @@
 #  Qt Widgets/Network/Sql + OpenCV + SeetaFace
 # ============================================================
 
+# ---- Qt6 Sql（仅服务端使用；顶层只查找公共的 Widgets/Network）----
+find_package(Qt6 6.5 REQUIRED COMPONENTS Sql)
+
 # ---- SeetaFace（仅服务端需要）----
 # 若找不到，配置时追加：-DCMAKE_PREFIX_PATH=<SeetaFace 安装根目录>（其下含 lib/cmake/SeetaFaceConfig.cmake）
 find_package(SeetaFace REQUIRED COMPONENTS

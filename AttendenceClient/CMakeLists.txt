@@ -39,7 +39,12 @@ target_link_libraries(AttendenceClient PRIVATE
 # ---- OpenCV 级联分类器目录 ----
 # 默认为 OpenCV 安装目录下的 etc/haarcascades；可用 -DOPENCV_HAARCASCADE_DIR=... 覆盖
 if(NOT OPENCV_HAARCASCADE_DIR)
-    foreach(candidate "../../../../etc/haarcascades" "../../../etc/haarcascades" "../../etc/haarcascades")
+    foreach(candidate
+        "../../../../share/opencv4/haarcascades"
+        "../../../../share/OpenCV/haarcascades"
+        "../../../../etc/haarcascades"
+        "../../../etc/haarcascades"
+        "../../etc/haarcascades")
         get_filename_component(_candidate "${OpenCV_DIR}/${candidate}" ABSOLUTE)
         if(EXISTS "${_candidate}/haarcascade_frontalface_default.xml")
             set(OPENCV_HAARCASCADE_DIR "${_candidate}")

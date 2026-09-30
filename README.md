@@ -4,8 +4,9 @@
 
 **Qt / C++ 实现的客户端-服务器（C/S）架构人脸识别考勤系统**
 
-A client-server face recognition attendance system built with C++17, Qt 6, OpenCV and SeetaFace2.
+A client-server face recognition attendance system built with C++17, Qt 6, OpenCV and SeetaFace6.
 
+[![Build Client](https://github.com/LL-yanyan/facego/actions/workflows/build.yml/badge.svg)](https://github.com/LL-yanyan/facego/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/)
 [![Qt 6](https://img.shields.io/badge/Qt-6.8-41CD52.svg)](https://www.qt.io/)
@@ -28,7 +29,7 @@ A client-server face recognition attendance system built with C++17, Qt 6, OpenC
 
 ## 功能特性 Features
 
-- **人脸注册与 1:N 识别**：基于 SeetaFace2 提取人脸特征，OpenCV 完成摄像头采集与预处理，支持 1:N 比对，相似度阈值可配
+- **人脸注册与 1:N 识别**：基于 SeetaFace6 提取人脸特征，OpenCV 完成摄像头采集与预处理，支持 1:N 比对，相似度阈值可配
 - **多终端并发接入**：服务端基于 `QTcpServer / QTcpSocket`，同时接入多台考勤客户端
 - **自定义应用层协议**：8 字节固定帧头（长度字段），“先读长度、后收数据”的分包机制，解决 TCP 粘包 / 半包
 - **多线程架构**：人脸处理对象 `FaceObject` 设计为可挂载到独立工作线程（`moveToThread`），识别结果通过信号回传 UI（当前默认在主线程同步执行，工作线程的启用与改进见架构文档“已知局限”）
@@ -43,7 +44,7 @@ A client-server face recognition attendance system built with C++17, Qt 6, OpenC
 | 语言 / 标准 | C++17 |
 | GUI 框架 | Qt 6（Widgets、Network、Sql） |
 | 计算机视觉 | OpenCV 4.5.x（图像采集 / 预处理 / 级联分类器） |
-| 人脸识别 | SeetaFace2（FaceDetector / FaceLandmarker / FaceDatabase） |
+| 人脸识别 | SeetaFace6（FaceDetector / FaceLandmarker / FaceDatabase / FaceEngine） |
 | 网络通信 | TCP，`QTcpServer` / `QTcpSocket`，自定义帧协议 |
 | 数据库 | SQLite（Qt Sql 模块） |
 | 构建 | CMake（推荐）/ qmake（保留 `.pro`） |
@@ -54,7 +55,7 @@ A client-server face recognition attendance system built with C++17, Qt 6, OpenC
  考勤客户端 A ┐
  考勤客户端 B ├── TCP（8字节帧头 / 解决粘包）──▶ 考勤服务端
  考勤客户端 C ┘                    ├── 网络模块  QTcpServer（多终端并发 + 协议解析）
-                                   ├── 人脸模块  SeetaFace2 + OpenCV（子线程）
+                                   ├── 人脸模块  SeetaFace6 + OpenCV（子线程）
                                    └── 数据模块  SQLite（单例封装，多表关联）
 ```
 
@@ -83,14 +84,14 @@ facego/
 │   ├── logindialog.*           # 登录 / 注册 / 找回密码
 │   ├── serverwindow.*          # 服务端主窗口（终端管理 / 记录）
 │   ├── database.*              # SQLite 封装（单例）
-│   ├── faceobject.*            # SeetaFace2 检测 / 特征 / 比对封装
+│   ├── faceobject.*            # SeetaFace6 检测 / 特征 / 比对封装
 │   ├── *.ui
 │   ├── src.qrc
 │   └── imgs/
 ├── docs/
 │   ├── architecture.md
 │   └── screenshots/
-├── .github/workflows/build.yml  # CI：Linux + Windows 构建
+├── .github/workflows/build.yml  # CI：Linux 构建 Client（Server 依赖 SeetaFace6）
 ├── CHANGELOG.md
 ├── LICENSE
 └── .gitignore
@@ -102,11 +103,11 @@ facego/
 | --- | --- | --- |
 | Qt | 6.5+（开发于 6.8） | 需包含 Widgets、Network、Sql 模块 |
 | OpenCV | 4.5.x | 需提供 CMake 配置（`OpenCVConfig.cmake`） |
-| SeetaFace2 | 2.x | 需提供 CMake 配置与模型文件（仅服务端） |
+| SeetaFace6 | 6.x | 需提供 CMake 配置与模型文件（仅服务端；官方通过网盘分发） |
 | CMake | 3.16+ | 构建系统 |
 | 编译器 | MinGW 13+（Windows）/ GCC（Linux） | 与 Qt / OpenCV ABI 一致 |
 
-> OpenCV 与 SeetaFace2 的第三方库、DLL 及模型文件体积较大，**不随仓库提供**，需自行下载配置。
+> OpenCV 与 SeetaFace6 的第三方库、DLL 及模型文件体积较大，**不随仓库提供**，需自行下载配置。SeetaFace6 官方开放版通过网盘分发，参见[环境依赖](#环境依赖-prerequisites)。
 
 ## 快速开始 Quick Start
 
@@ -115,17 +116,23 @@ facego/
 **Windows（MinGW，PowerShell）**
 
 ```powershell
-# 让 CMake 找到 Qt / OpenCV / SeetaFace
+# 让 CMake 找到 Qt / OpenCV / SeetaFace（多前缀请分别用 -D 指定，避免分号被 shell 吞掉）
 cmake -S . -B build -G "MinGW Makefiles" `
-  -DCMAKE_PREFIX_PATH="D:/Qt2/6.8.3/mingw_64;D:/opencv/SeetaFace" `
+  -DCMAKE_PREFIX_PATH="D:/Qt2/6.8.3/mingw_64" `
   -DOpenCV_DIR="D:/opencv/opencv452/x64/mingw/lib" `
+  -DSeetaFace_DIR="D:/opencv/SeetaFace/lib/cmake" `
   -DCMAKE_BUILD_TYPE=Release
 ```
 
 **Linux**
 
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+# 仅构建 Client（无需 SeetaFace，CI 采用此方式）
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFACEGO_BUILD_SERVER=OFF
+
+# 若已安装 SeetaFace6 SDK，可同时构建 Server（默认两个都构建）：
+#   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+#     -DSeetaFace_DIR=/path/to/SeetaFace/lib/cmake
 ```
 
 ### 2. 编译（Build）
@@ -149,6 +156,11 @@ cmake --build build -j
 - **可写运行时数据**（`database.db`、`face.db`、`login.ini`、`user_imgs/`）默认放在可执行文件所在目录；
 - **SeetaFace 模型目录**由 CMake 自动从 SeetaFace 安装位置推导（`<SeetaFace>/bin/model`），也可用 `-DSEETAFACE_MODEL_DIR=...` 指定；
 - **OpenCV 级联分类器目录**自动推导（`<OpenCV>/etc/haarcascades`），也可用 `-DOPENCV_HAARCASCADE_DIR=...` 指定。
+
+## 持续集成 CI
+
+- CI（GitHub Actions，Ubuntu）自动构建 **Client**：通过 apt 安装 Qt6 与 OpenCV，验证客户端编译。
+- **Server 不在 CI 覆盖范围**：它依赖中科视拓 **SeetaFace6**，官方仅通过网盘分发预编译二进制（无公开源码仓库 / 包管理器源），CI 无法自动获取。Server 已在本地实际构建验证；如需在 CI 构建，请自行准备 SDK 并参考 `.github/workflows/build.yml` 注释。
 
 ## 网络协议（简述）
 
@@ -177,6 +189,6 @@ cmake --build build -j
 
 ## 致谢 Acknowledgements
 
-- [SeetaFace2](https://github.com/seetafaceengine/SeetaFace2)
+- [SeetaFace6](https://github.com/SeetaFace6Open/index)
 - [OpenCV](https://opencv.org/)
 - [Qt](https://www.qt.io/)
