@@ -1,0 +1,58 @@
+# ===== CMake =====
+build/
+*/build/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+CMakeScripts
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+CMakeUserPresets.json
+CMakePresets.json
+
+# ===== 编译产物（Qt / MinGW / qmake）=====
+debug/
+release/
+*.o
+*.obj
+*.exe
+*.a
+*.lib
+*.dll
+Makefile
+Makefile.Debug
+Makefile.Release
+.qmake.stash
+ui_*.h
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+object_script.*
+
+# ===== Qt Creator / Visual Studio 本机配置 =====
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.autosave
+.qtcreator/
+.vs/
+
+# ===== 隐私与运行时数据：严禁上传（注册人脸 / 数据库 / 账号配置）=====
+*.db
+*.sqlite
+*.sqlite3
+user_imgs/
+login.ini
+
+# ===== 第三方库与模型（体积大，不随仓库提供）=====
+*.dat
+third_party/*/lib/
+third_party/*/bin/
+
+# ===== 系统 / 临时文件 =====
+Thumbs.db
+.DS_Store
+*~

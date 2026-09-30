@@ -1,0 +1,67 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  # ------------------------------------------------------------
+  # Linux 完整构建：apt 安装 Qt6 / OpenCV，源码构建 SeetaFace2
+  # 用于持续验证两个目标（Client + Server）在 Linux 下可编译
+  # ------------------------------------------------------------
+  linux-build:
+    name: Build on Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout FaceGo
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build git \
+            qt6-base-dev qt6-base-dev-tools qt6-tools-dev \
+            libgl1-mesa-dev libopencv-dev libopenblas-dev
+
+      - name: Build and install SeetaFace2
+        run: |
+          git clone --depth 1 https://github.com/seetafaceengine/SeetaFace2.git
+          cmake -S SeetaFace2 -B SeetaFace2/build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/seetaface-install"
+          cmake --build SeetaFace2/build --target install
+
+      - name: Configure FaceGo
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/seetaface-install"
+
+      - name: Build FaceGo (Client + Server)
+        run: cmake --build build
+
+      - name: Show build artifacts
+        run: ls -R build/bin || true
+
+  # ------------------------------------------------------------
+  # Windows 构建说明（默认注释，避免在缺少第三方库时产生红叉）
+  # 如需启用：用 jurplel/install-qt-action 安装 Qt，并用 vcpkg
+  # 安装 / 源码构建 OpenCV 与 SeetaFace2 后，再执行 CMake 构建。
+  # ------------------------------------------------------------
+  # windows-build:
+  #   name: Build on Windows
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Install Qt
+  #       uses: jurplel/install-qt-action@v4
+  #       with:
+  #         version: '6.8.*'
+  #         arch: win64_mingw
+  #     - name: Configure
+  #       run: cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release
+  #     - name: Build
+  #       run: cmake --build build

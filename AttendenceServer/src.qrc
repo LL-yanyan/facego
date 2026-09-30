@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <file>imgs/bg.jpeg</file>
+        <file>imgs/ico1.jpeg</file>
+        <file>imgs/ico2.jpeg</file>
+        <file>imgs/ico3.jpg</file>
+        <file>imgs/ico4.jpeg</file>
+        <file>imgs/ico6.jpeg</file>
+        <file>imgs/icon_default.jpeg</file>
+        <file>imgs/logo.jpeg</file>
+        <file>imgs/mov1.gif</file>
+        <file>imgs/mov2.gif</file>
+        <file>imgs/regist_logo.png</file>
+        <file>imgs/retrieve_password_logo.png</file>
+        <file>imgs/window_icon.jpeg</file>
+    </qresource>
+</RCC>
