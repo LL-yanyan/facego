@@ -61,7 +61,7 @@
 └──────────────────────────┴─────────────────────────────┘
 ```
 
-- 发送端：`QDataStream << data_size << byte_data`，并 `setVersion(QDataStream::Qt_6_8)` 保证跨版本一致；
+- 发送端：`QDataStream << data_size << byte_data`，并 `setVersion(QDataStream::Qt_6_0)` 固定序列化格式（帧内仅 quint64 / QByteArray，格式在 Qt 各版本间稳定），保证跨版本一致；
 - 接收端：**先读 8 字节长度，再按长度收满负载**，收不满则等待下一次 `readyRead`。
 
 ### 3.2 服务端接收状态机

@@ -153,7 +153,7 @@ void AttendenceWindow::timerEvent(QTimerEvent *e)
             // 构建一个数据流对象(方便添加数据头等信息 -> 打包数据)，并绑定到字节数据对象
             QDataStream data_stream(&send_data,QIODevice::WriteOnly);
             // 考虑到服务器版本兼容性的问题，在打包数据的时候，指定Qt的版本
-            data_stream.setVersion(QDataStream::Qt_6_8);
+            data_stream.setVersion(QDataStream::Qt_6_0);
             // 打包数据：将数据大小和有效数据拼起来
             data_stream << data_size << byte_data;
             qDebug() << "send_data_size:" << data_size+8;

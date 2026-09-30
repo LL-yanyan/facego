@@ -158,7 +158,7 @@ void ServerWindow::slotReadyRead()
     // 构造一个数据量对象(绑定套接字)，用来保存读到的数据，方便还原数据
     QDataStream data_stream(socket);
     // 考虑到兼容性问题，用和客户端版本相同的方式来解析数据
-    data_stream.setVersion(QDataStream::Qt_6_8);
+    data_stream.setVersion(QDataStream::Qt_6_0);
     // 判断客户端的数据是否发送完成，如果发送完了就处理数据，如果没有发送完，就等待它发送完成
     static quint64 data_size = 0;  // 用来保存有效数据的长度，如果这个值为0，就表示还没有读到数据
     if(data_size == 0)
